@@ -1,0 +1,41 @@
+#include <string.h>
+#include <assert.h>
+#include "cipher.h"
+
+typedef unsigned char byte;
+void xor(byte *in1, byte *in2, byte *out);
+void test_xor() {
+    byte in1[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte in2[] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte out[] = {0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
+    xor(in1, in2, out);
+    assert(memcmp(out,in2, 2) == 0);
+    assert(memcmp(out,in1, 2) != 0);
+}
+
+void mirror_key(byte *in, byte *out);
+void test_mirror_key() {
+    byte in[] =      {0xF0, 0x00, 0x11, 0x00, 0xFF, 0x00, 0x00, 0x00};
+    byte out[8];
+    byte cmp[] = {0x00, 0x00, 0x00, 0xFF, 0x00, 0x88, 0x00, 0x0F};
+    mirror_key(in, out);
+    assert(memcmp(out, cmp, 8) == 0);
+}
+
+void permutate(byte *block);
+void test_permutate() {
+    byte in[] =      {0xFF, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF};
+    byte cmp[] =      {0xFF, 0x07, 0xF8, 0x07, 0x00, 0x00, 0x00, 0xF8};
+    permutate(in);
+    assert(memcmp(in, cmp, 8) == 0);
+
+}
+
+int main(int argc, char *argv[])
+{
+    test_xor();
+    test_mirror_key();
+    test_permutate();
+
+    return 0;
+}
