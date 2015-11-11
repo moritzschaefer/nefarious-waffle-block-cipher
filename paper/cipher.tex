@@ -3,6 +3,8 @@
 \usepackage{hyperref}
 \usepackage{paralist}
 \usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{epstopdf}
 
 \begin{document}
     \title{Security Engineering Cipher Design Execise}
@@ -16,6 +18,12 @@
     We chose the basic principle of the feistel cipher, as it provides E/D similarity without alterations in the process and relies heavily on XOR operations which can easily be implemented in hardware.\\[0.5em]
     Our cipher uses a block size of 128bit with a 256bit key over 20 rounds. 
     \section{Round Function}
+    \begin{figure}[t]
+	\centering
+	\includegraphics[scale = .4]{roundfun.eps}
+	\caption{Proposed Round Function}
+	\label{fig:roundfun}
+    \end{figure}
 	The round function is that of a regular feistel cipher with two blocks of input from the plaintext, one of which is transformed through the Feistel function and XORed to the other plain text block. After each round both blocks are exchanged for a total of 20 rounds.
     \section{Feistel function}
     The round function takes a 64bit plaintext block and the round key as an input which are XORed to form the input to the S-Box which provides non-linearity. The S-Box output is again XORed with the mirrored (LSB $\rightarrow$ MSB) roundkey. Then a permutation is applied by rotating the result by 3 bits for additional diffusion. 3 bits have been chosen because the provide the very little overlap between original blocks through the rounds
