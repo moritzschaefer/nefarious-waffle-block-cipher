@@ -1,10 +1,30 @@
 \documentclass[a4paper]{article}
 
 \usepackage{hyperref}
+\usepackage{listings}
 \usepackage{paralist}
 \usepackage{siunitx}
 \usepackage{graphicx}
 \usepackage{epstopdf}
+\usepackage{color}
+
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\definecolor{mygreen}{rgb}{0,0.8,0.6}
+\definecolor{myorange}{rgb}{1.0,0.4,0}
+
+\lstset{frame = none,
+    basicstyle=\footnotesize\sffamily\color{black},
+    frame = single,
+    numbers = none,
+    numberfirstline = false,
+    language = python,
+    basicstyle = \ttfamily,
+    stringstyle=\color{myorange},
+    keywordstyle=\color{mygreen},
+    numberstyle=\tiny\color{mygray},
+    commentstyle=\color{mygray}
+}
+\usepackage{listings}
 
 \begin{document}
     \title{Security Engineering Cipher Design Execise}
@@ -65,6 +85,15 @@ $$
 S(x,y) = \mathrm{round} \left( \frac{\exp \left(3(x+1) + 17(y+3)\right)}{9} \right) \bmod 256
 $$
 Both components are added with a bias and multiplied by different prime numbers to achieve a high spreading of the expected values of the exponential function. The scaling factor 9 is necessary to be able to compute the S-Box with 64bit floating point numbers. For each combination of inputs the output of the S-Box can be found in~\ref{sbox}.
+\subsection{Differential Properties}
+Differential analysis of the proposed S-Box can be conducted automatically by the following piece of code:
+\begin{lstlisting}
+diffs = dict([ (i, [0]*256) for i in range(256) ])
+for a,b in itertools.product(range(256), range(256))
+diff = s_box[a&0x0f,a>>4] ^ s_box[b&0x0f,b>>4]
+diffs[a^b][diff] += 1
+\end{lstlisting}
+Evaluation of the generated output shows, that there are only two differential input-output combinations that occur more than ten times, and no combination occurs more than twelve times. Considering the size of the S-Box, these differential properties are satisfying, as it is not easy for an attacker to find a large amount of pairs with the same differential characteristics.
 \section{Key Schedule}
 The subkey for each of the 20 rounds are generated from the master key $K$ by the following set of rules:
 \begin{itemize}
@@ -72,5 +101,4 @@ The subkey for each of the 20 rounds are generated from the master key $K$ by th
     \item after 4, 8 and 16 rounds the master key is rotated by 101 bits to provide a good overlap of the key parts through several rounds
     \item after rotation, we add a constant to the master key from the last 4 rounds: $$K_{4n+1} = K_{4n} + 1 + 2^{64} + 2^{128} + 2^{192}$$ which in simpler words means, that the constant $1$ is added to each subkey to reduce problems with weak keys.
 \end{itemize}
-	
 \end{document}
